@@ -7,8 +7,17 @@
 // ============================================
 // GLOBAL STATE MANAGEMENT - Central Engine
 // ============================================
+const classroomsGrid = document.getElementById("classroomsGrid");
+var availableRoomsEl = document.getElementById("availableRooms");
+var occupiedRoomsEl = document.getElementById("occupiedRooms");
+const csvUpload = document.getElementById("csvUpload");
 
 const State = {
+
+    user: null,
+    users: [],
+    complaints: [],
+    lostAndFound: [],
   // User Authentication
   user: JSON.parse(localStorage.getItem('uniPulse_user')) || null,
   
@@ -16,96 +25,9 @@ const State = {
   users: JSON.parse(localStorage.getItem('uniPulse_users')) || [],
   
   // Smart Classrooms Data with Live Updates
-  classrooms: JSON.parse(localStorage.getItem('uniPulse_classrooms')) || [
-    {
-      id: 1,
-      name: 'CS Lab 1',
-      building: 'Engineering Block A',
-      floor: '2nd Floor',
-      capacity: 60,
-      status: 'available',
-      currentClass: null,
-      endTime: null,
-      nextClass: { subject: 'Data Structures', time: '2:00 PM', instructor: 'Dr. Smith' }
-    },
-    {
-      id: 2,
-      name: 'Physics Lab',
-      building: 'Science Block',
-      floor: '1st Floor',
-      capacity: 40,
-      status: 'occupied',
-      currentClass: { subject: 'Quantum Mechanics', instructor: 'Prof. Johnson' },
-      endTime: new Date(Date.now() + 45 * 60000).toISOString(), // 45 mins remaining
-      nextClass: { subject: 'Thermodynamics', time: '3:00 PM', instructor: 'Dr. Williams' }
-    },
-    {
-      id: 3,
-      name: 'Lecture Hall 101',
-      building: 'Main Building',
-      floor: 'Ground Floor',
-      capacity: 150,
-      status: 'available',
-      currentClass: null,
-      endTime: null,
-      nextClass: { subject: 'Introduction to AI', time: '1:00 PM', instructor: 'Dr. Brown' }
-    },
-    {
-      id: 4,
-      name: 'CS Lab 2',
-      building: 'Engineering Block A',
-      floor: '2nd Floor',
-      capacity: 60,
-      status: 'occupied',
-      currentClass: { subject: 'Web Development', instructor: 'Prof. Davis' },
-      endTime: new Date(Date.now() + 120 * 60000).toISOString(), // 120 mins remaining
-      nextClass: { subject: 'Mobile App Dev', time: '4:00 PM', instructor: 'Dr. Miller' }
-    },
-    {
-      id: 5,
-      name: 'Chemistry Lab',
-      building: 'Science Block',
-      floor: '2nd Floor',
-      capacity: 30,
-      status: 'available',
-      currentClass: null,
-      endTime: null,
-      nextClass: { subject: 'Organic Chemistry', time: '2:30 PM', instructor: 'Dr. Wilson' }
-    },
-    {
-      id: 6,
-      name: 'Seminar Room 1',
-      building: 'Main Building',
-      floor: '1st Floor',
-      capacity: 50,
-      status: 'occupied',
-      currentClass: { subject: 'Business Ethics', instructor: 'Prof. Anderson' },
-      endTime: new Date(Date.now() + 30 * 60000).toISOString(), // 30 mins remaining
-      nextClass: { subject: 'Marketing Strategy', time: '3:30 PM', instructor: 'Dr. Taylor' }
-    },
-    {
-      id: 7,
-      name: 'Art Studio',
-      building: 'Creative Arts Block',
-      floor: '3rd Floor',
-      capacity: 25,
-      status: 'available',
-      currentClass: null,
-      endTime: null,
-      nextClass: { subject: 'Digital Design', time: '4:00 PM', instructor: 'Prof. Martinez' }
-    },
-    {
-      id: 8,
-      name: 'Computer Lab 3',
-      building: 'Engineering Block B',
-      floor: '1st Floor',
-      capacity: 50,
-      status: 'occupied',
-      currentClass: { subject: 'Machine Learning', instructor: 'Dr. Chen' },
-      endTime: new Date(Date.now() + 90 * 60000).toISOString(), // 90 mins remaining
-      nextClass: { subject: 'Deep Learning', time: '5:00 PM', instructor: 'Prof. Kumar' }
-    }
-  ],
+  classrooms: JSON.parse(localStorage.getItem("uniPulse_classrooms")) || [],
+
+
   
   // Campus Complaints Data
   complaints: JSON.parse(localStorage.getItem('uniPulse_complaints')) || [
@@ -185,9 +107,10 @@ const State = {
   save() {
     localStorage.setItem('uniPulse_user', JSON.stringify(this.user));
     localStorage.setItem('uniPulse_users', JSON.stringify(this.users));
-    localStorage.setItem('uniPulse_classrooms', JSON.stringify(this.classrooms));
     localStorage.setItem('uniPulse_complaints', JSON.stringify(this.complaints));
     localStorage.setItem('uniPulse_lostAndFound', JSON.stringify(this.lostAndFound));
+    localStorage.setItem("uniPulse_state", JSON.stringify(this));
+    localStorage.setItem("uniPulse_classrooms", JSON.stringify(this.classrooms));
   },
   
   // Clear all data
@@ -666,18 +589,16 @@ function initializeSmartClassrooms() {
 }
 
 function renderClassrooms(classrooms = State.classrooms) {
-  const grid = document.getElementById('classroomsGrid');
   if (!grid) return;
   
   // Update stats
   const available = classrooms.filter(r => r.status === 'available').length;
   const occupied = classrooms.filter(r => r.status === 'occupied').length;
   
-  const availableEl = document.getElementById('availableRooms');
-  const occupiedEl = document.getElementById('occupiedRooms');
+ 
   
-  if (availableEl) availableEl.textContent = available;
-  if (occupiedEl) occupiedEl.textContent = occupied;
+  if (availableRoomsEl) availableEl.textContent = available;
+  if (occupiedRoomsEl) occupiedEl.textContent = occupied;
   
   // Render classroom cards
   grid.innerHTML = classrooms.map(room => {
@@ -1373,3 +1294,136 @@ document.querySelectorAll('[data-aos]').forEach(el => {
 console.log('%c🎓 UniPulse Smart Campus 2026 - HACKATHON EDITION', 'background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 12px 24px; border-radius: 8px; font-size: 18px; font-weight: bold;');
 console.log('%c✨ Complete Auth Flow | Live Classroom Status | Complaint Resolution | Image Preview', 'color: #94a3b8; font-size: 13px; font-weight: 600; margin-top: 8px;');
 console.log('%c🚀 State-Driven Architecture with localStorage Persistence', 'color: #10b981; font-size: 12px;');
+
+// ===== CSV Classroom Upload =====
+
+csvUpload.addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const text = event.target.result;
+        loadClassroomsFromCSV(text);
+    };
+    reader.readAsText(file);
+});
+
+function loadClassroomsFromCSV(csvText) {
+    const lines = csvText.trim().split("\n");
+    const headers = lines[0].split(",");
+
+    const classrooms = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const data = lines[i].split(",");
+        const classroom = {
+            room: data[0],
+            capacity: data[1],
+            status: data[2]
+        };
+        classrooms.push(classroom);
+    }
+
+    renderClassrooms(classrooms);
+    updateClassroomStats(classrooms);
+}
+
+function renderClassrooms(classrooms) {
+    classroomsGrid.innerHTML = "";
+
+    classrooms.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "classroom-card";
+
+        card.innerHTML = `
+            <h3>${c.room}</h3>
+            <p>Capacity: ${c.capacity}</p>
+            <span class="status ${c.status === "Available" ? "status-available" : "status-occupied"}">
+                ${c.status}
+            </span>
+        `;
+
+        classroomsGrid.appendChild(card);
+    });
+}
+/* ===============================
+   SMART CLASSROOM CSV FEATURE
+================================ */
+
+if (csvUpload) {
+    csvUpload.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            parseClassroomCSV(event.target.result);
+        };
+        reader.readAsText(file);
+    });
+}
+
+function parseClassroomCSV(csvText) {
+    const lines = csvText.trim().split("\n");
+    const headers = lines[0].split(",").map(h => h.trim());
+
+    const classrooms = lines.slice(1).map((line, index) => {
+        const values = line.split(",").map(v => v.trim());
+        const row = {};
+
+        headers.forEach((h, i) => row[h] = values[i]);
+
+        return {
+            id: Date.now() + index,
+            room: row.room,
+            capacity: Number(row.capacity),
+            status: row.status
+        };
+    });
+
+    State.classrooms = classrooms;
+    State.save();
+
+    renderClassrooms();
+    updateClassroomStats();
+}
+
+function renderClassrooms() {
+      classroomsGrid.innerHTML = "";
+    if (!classroomsGrid) return;
+
+    classroomsGrid.innerHTML = "";
+
+    if (State.classrooms.length === 0) {
+        classroomsGrid.innerHTML = "<p>No classroom data uploaded.</p>";
+        return;
+    }
+
+    State.classrooms.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "classroom-card";
+
+        card.innerHTML = `
+            <h3>${c.room}</h3>
+            <p>Capacity: ${c.capacity}</p>
+            <span class="status ${
+                c.status === "Available"
+                    ? "status-available"
+                    : "status-occupied"
+            }">${c.status}</span>
+        `;
+
+        classroomsGrid.appendChild(card);
+    });
+}
+
+function updateClassroomStats() {
+    const available = State.classrooms.filter(c => c.status === "Available").length;
+    const occupied = State.classrooms.filter(c => c.status === "Occupied").length;
+
+    if (availableRoomsEl) availableRoomsEl.innerText = available;
+    if (occupiedRoomsEl) occupiedRoomsEl.innerText = occupied;
+}
+
+
