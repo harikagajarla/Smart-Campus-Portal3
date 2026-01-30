@@ -1,0 +1,5 @@
+room,capacity,status
+CSE-101,60,Available
+CSE-102,50,Occupied
+ECE-201,70,Available
+CSE-301,90,Occupied
