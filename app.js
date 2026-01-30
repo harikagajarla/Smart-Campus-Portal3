@@ -685,7 +685,7 @@ function renderClassrooms(classrooms = State.classrooms) {
     const timeRemaining = room.endTime ? getTimeRemaining(room.endTime) : null;
     
     return `
-      <div class="classroom-card ${isAvailable ? 'available' : 'occupied'}">
+      <div class="classroom-card ${isAvailable ? 'available' : 'occupied'} id="cardRoom"">
         <div class="classroom-header">
           <div class="classroom-info">
             <h3 class="classroom-name">${room.name}</h3>
@@ -799,6 +799,7 @@ window.bookClassroom = function(roomId) {
   setTimeout(() => {
     Toast.show('Booking confirmed! Check your email for details.', 'info', 5000);
   }, 2000);
+
 };
 
 // ============================================
